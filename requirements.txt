@@ -1,0 +1,7 @@
+Flask
+Flask-SQLAlchemy
+Werkzeug
+qrcode[pil]
+Pillow
+pyOpenSSL
+cryptography

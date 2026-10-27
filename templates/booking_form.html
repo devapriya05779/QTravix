@@ -1,0 +1,111 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="auth-page-wrapper" style="background: radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 40%);">
+    <div class="auth-card-container" style="max-width: 550px;">
+        <!-- Decoration Elements -->
+        <div class="blob blob-1" style="background: var(--primary);"></div>
+        <div class="blob blob-2" style="background: #10b981;"></div>
+        
+        <div class="auth-box glass-effect animate-up" style="padding: 3.5rem 2.5rem;">
+            <div class="auth-header">
+                <div class="auth-icon-circle" style="background: var(--primary);">
+                    <i class="fas fa-ticket-alt"></i>
+                </div>
+                <h2>Secure Booking</h2>
+                <p>Bus: <span style="color: var(--primary); font-weight: 800;">{{ bus.name }}</span> ({{ bus.id }})</p>
+            </div>
+            
+            <form method="POST" class="auth-form">
+                {% set stop_list = bus.stops.split(',') if bus.stops else [bus.route_from, bus.route_to] %}
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                    <div class="form-group-modern">
+                        <label>From Source</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <select name="source" id="source" required style="width: 100%; padding: 1.1rem 1.25rem 1.1rem 3.2rem; border: 2px solid #e2e8f0; border-radius: 1.25rem; background: rgba(248, 250, 252, 0.5); font-size: 1rem; font-weight: 600; appearance: none;">
+                                {% for stop in stop_list %}
+                                    <option value="{{ stop.strip() }}">{{ stop.strip() }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group-modern">
+                        <label>To Destination</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-flag-checkered"></i>
+                            <select name="destination" id="destination" required style="width: 100%; padding: 1.1rem 1.25rem 1.1rem 3.2rem; border: 2px solid #e2e8f0; border-radius: 1.25rem; background: rgba(248, 250, 252, 0.5); font-size: 1rem; font-weight: 600; appearance: none;">
+                                {% for stop in stop_list %}
+                                    <option value="{{ stop.strip() }}" {% if loop.last %}selected{% endif %}>{{ stop.strip() }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group-modern" style="margin-bottom: 2rem;">
+                    <label>Number of Passengers</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-users"></i>
+                        <input type="number" name="num_passengers" required min="1" value="1" id="num_passengers" placeholder="1">
+                    </div>
+                </div>
+
+                <!-- Fare Summary Card -->
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 1.5rem; padding: 2rem; margin-bottom: 2.5rem; text-align: center;">
+                    <div style="font-size: 0.75rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">Estimated Total Fare</div>
+                    <div style="display: flex; align-items: baseline; justify-content: center; gap: 0.25rem;">
+                        <span style="font-size: 1.5rem; font-weight: 700; color: #0f172a;">₹</span>
+                        <input type="number" step="0.01" name="fare" required readonly id="total_fare" value="{{ bus.base_fare }}" 
+                               style="background: transparent; border: none; font-size: 3rem; font-weight: 900; color: #0f172a; width: 200px; text-align: center; outline: none; pointer-events: none;">
+                    </div>
+                    <div id="fare_info" style="margin-top: 1rem; padding: 0.5rem 1rem; background: white; border-radius: 100px; display: inline-block; font-size: 0.85rem; font-weight: 700; color: var(--primary); border: 1px solid #dbeafe;">
+                        Base fare: ₹{{ bus.base_fare }} per stage
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-modern">
+                    <span>Confirm & Pay Now</span>
+                    <i class="fas fa-credit-card"></i>
+                </button>
+            </form>
+            
+            <div class="auth-footer">
+                <p><i class="fas fa-shield-halved"></i> Secure end-to-end encrypted booking</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const baseFarePerStage = parseFloat("{{ bus.base_fare }}") || 10;
+    const stops = [{% for stop in stop_list %}"{{ stop.strip() }}"{% if not loop.last %}, {% endif %}{% endfor %}];
+    
+    const sourceSelect = document.getElementById('source');
+    const destSelect = document.getElementById('destination');
+    const numPassengersInput = document.getElementById('num_passengers');
+    const totalFareInput = document.getElementById('total_fare');
+    const fareInfo = document.getElementById('fare_info');
+
+    function calculateFare() {
+        const sourceIndex = stops.indexOf(sourceSelect.value);
+        const destIndex = stops.indexOf(destSelect.value);
+        const numPassengers = parseInt(numPassengersInput.value) || 1;
+        
+        let stages = Math.abs(destIndex - sourceIndex);
+        if (stages === 0) stages = 0;
+        
+        const totalFare = (stages * baseFarePerStage * numPassengers).toFixed(2);
+        totalFareInput.value = totalFare;
+        
+        fareInfo.innerHTML = `<i class="fas fa-route"></i> ${stages} stages at ₹${baseFarePerStage} per stage`;
+    }
+
+    sourceSelect.addEventListener('change', calculateFare);
+    destSelect.addEventListener('change', calculateFare);
+    numPassengersInput.addEventListener('input', calculateFare);
+    
+    calculateFare();
+</script>
+{% endblock %}

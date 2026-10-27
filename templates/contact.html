@@ -1,0 +1,165 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="auth-page-wrapper" style="flex-direction: column; padding-top: 0; min-height: auto; background: radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.05) 0%, transparent 40%);">
+    
+    <!-- Hero Section -->
+    <div style="width: 100%; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 8rem 1rem 12rem 1rem; text-align: center; color: white; position: relative; overflow: hidden; margin-bottom: -8rem;">
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.1; background-image: url('https://www.transparenttextures.com/patterns/cubes.png'); pointer-events: none;"></div>
+        
+        <!-- Blobs for Hero -->
+        <div class="blob" style="top: -100px; left: -100px; background: var(--primary); opacity: 0.2; width: 400px; height: 400px;"></div>
+        <div class="blob" style="bottom: -100px; right: -100px; background: #8b5cf6; opacity: 0.1; width: 400px; height: 400px;"></div>
+
+        <div style="max-width: 800px; margin: 0 auto; position: relative; z-index: 1;">
+            <span style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; padding: 0.6rem 1.8rem; border-radius: 100px; font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 2rem; display: inline-block; border: 1px solid rgba(59, 130, 246, 0.3);">Support Network</span>
+            <h1 style="font-size: clamp(3rem, 8vw, 4.5rem); font-weight: 900; letter-spacing: -0.05em; line-height: 1.1; margin-bottom: 1.5rem;">How can we help?</h1>
+            <p style="font-size: 1.25rem; color: #94a3b8; font-weight: 500; max-width: 600px; margin: 0 auto; line-height: 1.6;">Our dedicated support team is here to ensure your journey with QTravix is seamless and secure.</p>
+        </div>
+    </div>
+
+    <!-- Contact Cards Grid -->
+    <div class="main-container" style="position: relative; z-index: 20; padding-bottom: 8rem;">
+        <div class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2.5rem; margin-bottom: 5rem;">
+            
+            <!-- Support Card -->
+            <div class="auth-box glass-effect animate-up" style="padding: 3.5rem 2rem; border-radius: 3rem;">
+                <div class="auth-icon-circle" style="background: #3b82f6; width: 70px; height: 70px; margin-bottom: 2rem;">
+                    <i class="fas fa-headset"></i>
+                </div>
+                <h3 style="font-size: 1.75rem; font-weight: 800; color: #0f172a; margin-bottom: 1rem;">Customer Care</h3>
+                <p style="color: #64748b; font-weight: 600; margin-bottom: 2rem; line-height: 1.7;">Technical issues or booking assistance? Our agents are online 24/7.</p>
+                <div style="background: #f8fafc; padding: 1.5rem; border-radius: 1.5rem; border: 1px solid #e2e8f0; text-align: left;">
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                        <i class="fas fa-envelope" style="color: var(--primary);"></i>
+                        <span style="font-weight: 800; color: #1e293b;">support@qtravix.com</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <i class="fas fa-phone-alt" style="color: var(--primary);"></i>
+                        <span style="font-weight: 800; color: #1e293b;">+1 (800) QTRAVIX</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Office Card -->
+            <div class="auth-box glass-effect animate-up" style="padding: 3.5rem 2rem; border-radius: 3rem; animation-delay: 0.1s;">
+                <div class="auth-icon-circle" style="background: #10b981; width: 70px; height: 70px; margin-bottom: 2rem;">
+                    <i class="fas fa-map-location-dot"></i>
+                </div>
+                <h3 style="font-size: 1.75rem; font-weight: 800; color: #0f172a; margin-bottom: 1rem;">HQ Location</h3>
+                <p style="color: #64748b; font-weight: 600; margin-bottom: 2rem; line-height: 1.7;">Visit our innovation hub to meet the team behind the technology.</p>
+                <div style="background: #f8fafc; padding: 1.5rem; border-radius: 1.5rem; border: 1px solid #e2e8f0; text-align: left;">
+                    <div style="display: flex; align-items: flex-start; gap: 1rem;">
+                        <i class="fas fa-building" style="color: #10b981; margin-top: 0.3rem;"></i>
+                        <span style="font-weight: 800; color: #1e293b; line-height: 1.6;">123 Innovation Drive, Digital Hub<br>Tech City, India 560001</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Card -->
+            <div class="auth-box glass-effect animate-up" style="padding: 3.5rem 2rem; border-radius: 3rem; animation-delay: 0.2s;">
+                <div class="auth-icon-circle" style="background: #8b5cf6; width: 70px; height: 70px; margin-bottom: 2rem;">
+                    <i class="fas fa-share-nodes"></i>
+                </div>
+                <h3 style="font-size: 1.75rem; font-weight: 800; color: #0f172a; margin-bottom: 1rem;">Digital Presence</h3>
+                <p style="color: #64748b; font-weight: 600; margin-bottom: 2.5rem; line-height: 1.7;">Stay updated with our latest features, routes and exclusive travel offers.</p>
+                <div style="display: flex; gap: 1.25rem; justify-content: center;">
+                    <a href="#" class="social-circle-btn"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-circle-btn"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-circle-btn"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="social-circle-btn"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Message Form -->
+        <div class="auth-box glass-effect animate-up" style="max-width: 900px; margin: 0 auto; border-radius: 4rem; padding: 5rem 4rem; animation-delay: 0.3s;">
+            <div style="text-align: center; margin-bottom: 4rem;">
+                <h2 style="font-size: 2.75rem; font-weight: 900; color: #0f172a; letter-spacing: -0.04em; line-height: 1.1; margin-bottom: 1rem;">Direct Inquiry</h2>
+                <p style="color: #64748b; font-size: 1.1rem; font-weight: 600;">Tell us more about your needs and we'll reply within 24 hours.</p>
+            </div>
+
+            <form action="#" class="auth-form" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <div class="form-group-modern" style="grid-column: span 1;">
+                    <label>Full Name</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-user"></i>
+                        <input type="text" placeholder="John Doe" required>
+                    </div>
+                </div>
+                <div class="form-group-modern" style="grid-column: span 1;">
+                    <label>Email Address</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" placeholder="john@example.com" required>
+                    </div>
+                </div>
+                <div class="form-group-modern" style="grid-column: span 2;">
+                    <label>Subject</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-comment-dots"></i>
+                        <input type="text" placeholder="How can we help?" required>
+                    </div>
+                </div>
+                <div class="form-group-modern" style="grid-column: span 2;">
+                    <label>Detailed Message</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-pen-nib" style="top: 1.3rem;"></i>
+                        <textarea placeholder="Write your message here..." required 
+                                  style="width: 100%; padding: 1.1rem 1.25rem 1.1rem 3.2rem; border: 2px solid #e2e8f0; border-radius: 1.5rem; font-size: 1rem; font-weight: 500; background: rgba(248, 250, 252, 0.5); height: 160px; resize: none; font-family: inherit; transition: all 0.3s ease;"></textarea>
+                    </div>
+                </div>
+                <div style="grid-column: span 2; margin-top: 1rem;">
+                    <button type="button" class="btn-modern" onclick="alert('Inquiry Sent! We will contact you shortly.')">
+                        <span>Send Your Message</span>
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .social-circle-btn {
+        width: 50px;
+        height: 50px;
+        background: #f1f5f9;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        font-size: 1.2rem;
+        text-decoration: none;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border: 1px solid #e2e8f0;
+    }
+
+    .social-circle-btn:hover {
+        background: var(--primary);
+        color: white;
+        transform: translateY(-8px) rotate(15deg);
+        box-shadow: 0 15px 25px -5px var(--primary-glow);
+        border-color: var(--primary);
+    }
+
+    textarea:focus {
+        outline: none;
+        border-color: var(--primary) !important;
+        background: white !important;
+        box-shadow: 0 0 0 4px var(--accent-glow);
+    }
+
+    .glass-effect:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 40px 80px -15px rgba(0,0,0,0.15);
+    }
+
+    @media (max-width: 768px) {
+        .auth-form { grid-template-columns: 1fr !important; }
+        .form-group-modern { grid-column: span 2 !important; }
+        .glass-effect { padding: 3rem 1.5rem !important; }
+    }
+</style>
+{% endblock %}

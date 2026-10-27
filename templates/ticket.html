@@ -1,0 +1,175 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="content" style="max-width: 800px; margin: 0 auto;">
+    <div class="no-print" style="text-align: center; margin-bottom: 3rem;">
+        <h1 style="font-size: 2.5rem; font-weight: 900; letter-spacing: -0.04em;">Your Digital Ticket</h1>
+        <p style="color: #64748b; font-weight: 500; margin-top: 0.5rem;">Keep this QR code ready for the conductor to scan.</p>
+    </div>
+
+    <div class="ticket-wrapper" style="background: white; border-radius: 2rem; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); border: 1px solid #e2e8f0; position: relative;">
+        <!-- Header -->
+        <div style="background: #0f172a; color: white; padding: 2rem; display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-weight: 900; font-size: 1.5rem; letter-spacing: -0.05em;">QTravix</div>
+            <div style="font-size: 0.7rem; text-transform: uppercase; background: rgba(255,255,255,0.1); padding: 0.4rem 1rem; border-radius: 2rem; font-weight: 800; border: 1px solid rgba(255,255,255,0.2);">Verified Travel Pass</div>
+        </div>
+
+        <div style="padding: 3rem;">
+            <!-- Passenger and Fare -->
+            <div style="display: flex; justify-content: space-between; margin-bottom: 2rem; gap: 2rem;">
+                <div style="flex: 1;">
+                    <p style="font-size: 0.7rem; color: #64748b; text-transform: uppercase; font-weight: 800; margin-bottom: 0.4rem; letter-spacing: 0.05em;">Passengers</p>
+                    <p style="font-weight: 800; font-size: 1.1rem;">{{ booking.num_passengers }} Person(s)</p>
+                </div>
+                <div style="flex: 1; text-align: right;">
+                    <p style="font-size: 0.7rem; color: #64748b; text-transform: uppercase; font-weight: 800; margin-bottom: 0.4rem; letter-spacing: 0.05em;">Total Fare</p>
+                    <p style="font-weight: 900; font-size: 1.5rem; color: var(--primary);">₹{{ "%.2f"|format(booking.fare) }}</p>
+                </div>
+            </div>
+
+            <!-- Route Info -->
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 1.5rem; background: #f8fafc; border-radius: 1.5rem; border: 1px dashed #cbd5e1; margin-bottom: 2rem;">
+                <div style="flex: 1;">
+                    <p style="font-size: 0.7rem; color: #64748b; text-transform: uppercase; font-weight: 800; margin-bottom: 0.2rem;">Origin</p>
+                    <p style="font-weight: 800; font-size: 1.1rem;">{{ booking.source }}</p>
+                </div>
+                <div style="padding: 0 1.5rem; color: #cbd5e1; font-size: 2rem; font-weight: 200;">→</div>
+                <div style="flex: 1; text-align: right;">
+                    <p style="font-size: 0.7rem; color: #64748b; text-transform: uppercase; font-weight: 800; margin-bottom: 0.2rem;">Destination</p>
+                    <p style="font-weight: 800; font-size: 1.1rem;">{{ booking.destination }}</p>
+                </div>
+            </div>
+
+            <!-- Bus and Time -->
+            <div style="display: flex; justify-content: space-between; margin-bottom: 3rem; gap: 2rem;">
+                <div style="flex: 1;">
+                    <p style="font-size: 0.7rem; color: #64748b; text-transform: uppercase; font-weight: 800; margin-bottom: 0.4rem;">Service Details</p>
+                    <p style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">{{ bus.name }}</p>
+                    <p style="font-size: 0.8rem; color: #64748b; font-weight: 600;">Vehicle ID: {{ bus.id }}</p>
+                </div>
+                <div style="flex: 1; text-align: right;">
+                    <p style="font-size: 0.7rem; color: #64748b; text-transform: uppercase; font-weight: 800; margin-bottom: 0.4rem;">Departure</p>
+                    <p style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">{{ bus.date }}</p>
+                    <p style="font-size: 0.95rem; font-weight: 800; color: var(--primary);">{{ bus.starting_time }}</p>
+                </div>
+            </div>
+
+            <!-- QR Section -->
+            <div style="text-align: center; padding-top: 2rem; border-top: 2px dashed #e2e8f0;">
+                <div id="qr-container" style="display: inline-block; padding: 1.5rem; background: #f8fafc; border-radius: 2rem; border: 1px solid #e2e8f0; position: relative; min-width: 210px; min-height: 210px;">
+                    <div id="qr-loading" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.8rem; color: #64748b; font-weight: 700;">Generating QR...</div>
+                    <img id="qrcode-img" style="width: 180px; height: 180px; display: block; margin: 0 auto; opacity: 0; transition: opacity 0.3s ease;" alt="Ticket QR">
+                </div>
+                <div style="margin-top: 1.5rem; font-size: 0.85rem; color: #64748b; font-weight: 700;">
+                    <p style="color: #0f172a; font-weight: 800; font-family: monospace; font-size: 1rem;">TICKET #{{ booking.id }}</p>
+                    <p style="margin-top: 0.25rem;">Issued on {{ booking.timestamp.strftime('%d %b %Y, %H:%M') }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Note -->
+        <div style="background: #f1f5f9; padding: 1.5rem; text-align: center; font-size: 0.75rem; color: #475569; font-weight: 700; border-top: 1px solid #e2e8f0; letter-spacing: 0.02em;">
+            This digital pass is unique and valid for a single journey.
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="no-print" style="display: flex; justify-content: center; gap: 1rem; margin-top: 4rem; flex-wrap: wrap; padding-bottom: 4rem;">
+        <button onclick="window.print()" class="btn-submit" style="width: auto; padding: 1rem 2.5rem; background: #64748b; display: flex; align-items: center; gap: 0.5rem; border-radius: 1.25rem;">
+            <span>🖨️</span> Print Ticket
+        </button>
+        <button onclick="saveAsImage()" class="btn-submit" style="width: auto; padding: 1rem 2.5rem; background: #3b82f6; display: flex; align-items: center; gap: 0.5rem; border-radius: 1.25rem;">
+            <span>🖼️</span> Save Image
+        </button>
+        <button onclick="saveAsPDF()" class="btn-submit" style="width: auto; padding: 1rem 2.5rem; background: #10b981; display: flex; align-items: center; gap: 0.5rem; border-radius: 1.25rem;">
+            <span>📄</span> Save PDF
+        </button>
+        <a href="{{ url_for('index') }}" class="btn-submit" style="width: auto; padding: 1rem 2.5rem; background: #94a3b8; text-decoration: none; display: flex; align-items: center; gap: 0.5rem; border-radius: 1.25rem;">
+            <span>🏠</span> Home
+        </a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+    // Generate QR code
+    QRCode.toDataURL("{{ ticket_data }}", { 
+        width: 400,
+        margin: 2,
+        color: {
+            dark: "#000000",
+            light: "#ffffff"
+        },
+        errorCorrectionLevel: 'H'
+    }, function (err, url) {
+        if (err) {
+            console.error(err);
+            document.getElementById('qr-loading').innerText = "QR Error";
+            return;
+        }
+        const img = document.getElementById('qrcode-img');
+        img.src = url;
+        img.onload = () => {
+            img.style.opacity = "1";
+            document.getElementById('qr-loading').style.display = "none";
+        };
+    });
+
+    async function saveAsImage() {
+        const ticket = document.querySelector('.ticket-wrapper');
+        const originalShadow = ticket.style.boxShadow;
+        ticket.style.boxShadow = 'none'; // Clean capture
+        
+        const canvas = await html2canvas(ticket, {
+            scale: 3,
+            useCORS: true,
+            backgroundColor: '#ffffff',
+            logging: false,
+            borderRadius: 0
+        });
+        
+        ticket.style.boxShadow = originalShadow;
+        
+        const link = document.createElement('a');
+        link.download = 'QTravix_Ticket_{{ booking.id }}.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    }
+
+    async function saveAsPDF() {
+        const { jsPDF } = window.jspdf;
+        const ticket = document.querySelector('.ticket-wrapper');
+        const originalShadow = ticket.style.boxShadow;
+        ticket.style.boxShadow = 'none';
+        
+        const canvas = await html2canvas(ticket, {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: '#ffffff'
+        });
+        
+        ticket.style.boxShadow = originalShadow;
+        
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF({
+            orientation: 'portrait',
+            unit: 'px',
+            format: [canvas.width / 2, canvas.height / 2]
+        });
+        
+        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width / 2, canvas.height / 2);
+        pdf.save('QTravix_Ticket_{{ booking.id }}.pdf');
+    }
+</script>
+
+<style>
+    @media print {
+        .navbar, .footer, .no-print { display: none !important; }
+        body { background: white !important; }
+        .content { padding: 0 !important; margin: 0 !important; max-width: none !important; width: 100% !important; }
+        .ticket-wrapper { box-shadow: none !important; border: 1px solid #e2e8f0 !important; margin: 0 auto !important; transform: scale(0.9); transform-origin: top center; }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,179 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="auth-page-wrapper" style="background: #f1f5f9;">
+    <div class="auth-box" style="max-width: 600px; padding: 2.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; border-bottom: 2px solid #f1f5f9; padding-bottom: 1rem;">
+            <h2 style="margin-bottom: 0; font-size: 1.5rem; font-weight: 800; color: var(--nav-dark);">Secure Payment</h2>
+            <div style="text-align: right;">
+                <p style="font-size: 0.8rem; color: #64748b; font-weight: 600; text-transform: uppercase; margin: 0;">Amount to Pay</p>
+                <p style="font-size: 1.5rem; font-weight: 900; color: var(--primary); margin: 0;">₹{{ "%.2f"|format(booking.fare) }}</p>
+            </div>
+        </div>
+
+        <div style="text-align: left; margin-bottom: 2rem; background: #f8fafc; padding: 1.5rem; border-radius: 1rem; border: 1px solid #e2e8f0;">
+            <p style="margin-bottom: 0.5rem; font-size: 0.95rem;"><strong>Bus:</strong> {{ bus.name }} ({{ bus.id }})</p>
+            <p style="margin-bottom: 0.5rem; font-size: 0.95rem;"><strong>Route:</strong> {{ booking.source }} → {{ booking.destination }}</p>
+            <p style="margin-bottom: 0; font-size: 0.95rem;"><strong>Passengers:</strong> {{ booking.num_passengers }}</p>
+        </div>
+
+        <div id="payment-selection-area">
+            <p style="text-align: left; font-weight: 700; color: #475569; margin-bottom: 1rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em;">Select Payment Method</p>
+            
+            <!-- UPI Option -->
+            <div class="payment-option" onclick="selectPayment('upi')" id="opt-upi" style="display: flex; align-items: center; padding: 1.25rem; border: 2px solid #e2e8f0; border-radius: 1rem; margin-bottom: 1rem; cursor: pointer; transition: all 0.2s;">
+                <div style="font-size: 1.5rem; margin-right: 1.5rem; width: 40px; text-align: center;">📱</div>
+                <div style="text-align: left; flex: 1;">
+                    <p style="font-weight: 700; margin: 0; color: var(--nav-dark);">UPI (GPay, PhonePe, Paytm)</p>
+                    <p style="font-size: 0.85rem; color: #64748b; margin: 0;">Instant payment using your UPI ID</p>
+                    
+                    <div id="upi-input-box" class="method-input-container" style="display: none; margin-top: 1rem;" onclick="event.stopPropagation()">
+                        <input type="text" id="upi_id" placeholder="Enter UPI ID (e.g. user@okaxis)" 
+                               style="width: 100%; padding: 0.8rem; border: 2px solid var(--primary); border-radius: 0.75rem; font-size: 0.95rem; background: white;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Option -->
+            <div class="payment-option" onclick="selectPayment('card')" id="opt-card" style="display: flex; align-items: center; padding: 1.25rem; border: 2px solid #e2e8f0; border-radius: 1rem; margin-bottom: 1rem; cursor: pointer; transition: all 0.2s;">
+                <div style="font-size: 1.5rem; margin-right: 1.5rem; width: 40px; text-align: center;">💳</div>
+                <div style="text-align: left; flex: 1;">
+                    <p style="font-weight: 700; margin: 0; color: var(--nav-dark);">Credit / Debit Card</p>
+                    <p style="font-size: 0.85rem; color: #64748b; margin: 0;">Visa, Mastercard, RuPay, Amex</p>
+
+                    <div id="card-input-box" class="method-input-container" style="display: none; margin-top: 1rem;" onclick="event.stopPropagation()">
+                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                            <input type="text" id="card_num" placeholder="Card Number (16 digits)" maxlength="19"
+                                   style="width: 100%; padding: 0.8rem; border: 2px solid var(--primary); border-radius: 0.75rem; font-size: 0.95rem; background: white;">
+                            <div style="display: flex; gap: 0.75rem;">
+                                <input type="text" id="card_exp" placeholder="MM/YY" maxlength="5" style="flex: 1; padding: 0.8rem; border: 2px solid var(--primary); border-radius: 0.75rem; font-size: 0.95rem; background: white;">
+                                <input type="password" id="card_cvv" placeholder="CVV" maxlength="3" style="flex: 1; padding: 0.8rem; border: 2px solid var(--primary); border-radius: 0.75rem; font-size: 0.95rem; background: white;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Net Banking Option -->
+            <div class="payment-option" onclick="selectPayment('netbanking')" id="opt-netbanking" style="display: flex; align-items: center; padding: 1.25rem; border: 2px solid #e2e8f0; border-radius: 1rem; margin-bottom: 1.5rem; cursor: pointer; transition: all 0.2s;">
+                <div style="font-size: 1.5rem; margin-right: 1.5rem; width: 40px; text-align: center;">🏦</div>
+                <div style="text-align: left; flex: 1;">
+                    <p style="font-weight: 700; margin: 0; color: var(--nav-dark);">Net Banking</p>
+                    <p style="font-size: 0.85rem; color: #64748b; margin: 0;">Login to your bank account securely</p>
+
+                    <div id="nb-input-box" class="method-input-container" style="display: none; margin-top: 1rem;" onclick="event.stopPropagation()">
+                        <select id="bank_name" style="width: 100%; padding: 0.8rem; border: 2px solid var(--primary); border-radius: 0.75rem; font-size: 0.95rem; background: white; appearance: none; cursor: pointer;">
+                            <option value="">-- Choose Your Bank --</option>
+                            <option value="sbi">State Bank of India</option>
+                            <option value="hdfc">HDFC Bank</option>
+                            <option value="icici">ICICI Bank</option>
+                            <option value="axis">Axis Bank</option>
+                            <option value="kotak">Kotak Mahindra Bank</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <form method="POST" id="payment-form">
+            <button type="button" id="pay-btn" onclick="processPayment()" class="btn-submit" style="height: 60px; font-size: 1.1rem; letter-spacing: 0.05em; display: none;">PAY ₹{{ "%.2f"|format(booking.fare) }}</button>
+        </form>
+
+        <div id="processing" style="display: none; text-align: center; padding: 2rem 0;">
+            <div class="spinner" style="width: 50px; height: 50px; border: 5px solid #f1f5f9; border-top: 5px solid var(--primary); border-radius: 50%; margin: 0 auto 1.5rem; animation: spin 1s linear infinite;"></div>
+            <p style="font-weight: 700; color: var(--nav-dark); margin-bottom: 0.5rem; font-size: 1.2rem;">Processing Your Payment...</p>
+            <p style="color: #64748b;">Please do not close the window or click back.</p>
+        </div>
+
+        <div id="success-anim" style="display: none; text-align: center; padding: 2rem 0;">
+            <div style="width: 80px; height: 80px; background: #10b981; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3rem; margin: 0 auto 1.5rem;">✓</div>
+            <p style="font-weight: 900; color: #059669; margin-bottom: 0.5rem; font-size: 1.5rem;">Payment Successful!</p>
+            <p style="color: #64748b;">Generating your ticket now...</p>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .payment-option:hover { border-color: var(--primary) !important; background: #f0f7ff; }
+    .payment-option.selected { border-color: var(--primary) !important; background: #eff6ff; box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.1); }
+</style>
+
+<script>
+    let selectedMethod = null;
+
+    function selectPayment(method) {
+        selectedMethod = method;
+        
+        // Reset all options and hide all input boxes
+        document.querySelectorAll('.payment-option').forEach(opt => {
+            opt.classList.remove('selected');
+        });
+        document.querySelectorAll('.method-input-container').forEach(box => {
+            box.style.display = 'none';
+        });
+
+        // Select current option and show its specific input box
+        document.getElementById('opt-' + method).classList.add('selected');
+        
+        if (method === 'upi') document.getElementById('upi-input-box').style.display = 'block';
+        else if (method === 'card') document.getElementById('card-input-box').style.display = 'block';
+        else if (method === 'netbanking') document.getElementById('nb-input-box').style.display = 'block';
+
+        // Show pay button
+        document.getElementById('pay-btn').style.display = 'block';
+        
+        // Haptic feedback for touch devices
+        if (navigator.vibrate) navigator.vibrate(10);
+    }
+
+    function processPayment() {
+        // Basic validation
+        if (selectedMethod === 'upi') {
+            if (!document.getElementById('upi_id').value.includes('@')) {
+                alert("Please enter a valid UPI ID (e.g. user@bank)");
+                return;
+            }
+        } else if (selectedMethod === 'card') {
+            if (document.getElementById('card_num').value.length < 16) {
+                alert("Please enter a valid 16-digit card number");
+                return;
+            }
+        } else if (selectedMethod === 'netbanking') {
+            if (document.getElementById('bank_name').value === "") {
+                alert("Please select your bank");
+                return;
+            }
+        }
+
+        document.getElementById('payment-selection-area').style.display = 'none';
+        document.getElementById('pay-btn').style.display = 'none';
+        document.getElementById('processing').style.display = 'block';
+
+        // Simulate a delay for payment processing
+        setTimeout(() => {
+            document.getElementById('processing').style.display = 'none';
+            document.getElementById('success-anim').style.display = 'block';
+            
+            // Redirect after success animation
+            setTimeout(() => {
+                document.getElementById('payment-form').submit();
+            }, 1200);
+        }, 2200);
+    }
+
+    // Auto-formatting for card inputs
+    document.getElementById('card_exp').addEventListener('input', function (e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length >= 2) {
+            e.target.value = value.slice(0, 2) + '/' + value.slice(2, 4);
+        }
+    });
+
+    document.getElementById('card_num').addEventListener('input', function (e) {
+        let value = e.target.value.replace(/\D/g, '');
+        let formatted = value.match(/.{1,4}/g)?.join(' ') || "";
+        e.target.value = formatted.slice(0, 19);
+    });
+</script>
+{% endblock %}

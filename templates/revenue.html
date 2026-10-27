@@ -1,0 +1,187 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="revenue-dashboard" style="max-width: 1300px; margin: 0 auto; padding: 2rem 1rem;">
+    <!-- Page Header -->
+    <div style="margin-bottom: 3rem; text-align: left;">
+        <h1 style="font-size: 3rem; font-weight: 900; letter-spacing: -0.04em; color: var(--text-main); margin-bottom: 0.5rem;">Revenue Analytics</h1>
+        <p style="font-size: 1.1rem; color: #64748b; font-weight: 500;">Monitor your financial performance and passenger flow.</p>
+    </div>
+
+    <div class="revenue-container" style="display: flex; flex-direction: column; gap: 2.5rem;">
+        
+        <!-- Filter Section -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem;">
+            <!-- Daily Filter -->
+            <div class="card" style="padding: 2rem; border: none; background: white; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05), 0 10px 10px -5px rgba(0,0,0,0.02); overflow: hidden; position: relative;">
+                <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--primary);"></div>
+                <h3 style="margin-bottom: 1.5rem; color: var(--primary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 800;">📅 Daily Statistics</h3>
+                <form action="{{ url_for('revenue') }}" method="GET" style="display: flex; gap: 0.75rem; align-items: flex-end;">
+                    <div class="form-group" style="margin-bottom: 0; flex: 1;">
+                        <label style="font-size: 0.75rem;">Pick a Date</label>
+                        <input type="date" name="date" value="{{ selected_date }}" required 
+                               style="background: #f1f5f9; border: 1px solid #e2e8f0; padding: 0.75rem 1rem; border-radius: 0.75rem; font-weight: 600; font-family: inherit;">
+                    </div>
+                    <button type="submit" class="btn-submit" style="width: auto; padding: 0.75rem 1.5rem; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px var(--primary-glow);">Analyze</button>
+                </form>
+            </div>
+
+            <!-- Monthly Filter -->
+            <div class="card" style="padding: 2rem; border: none; background: white; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05), 0 10px 10px -5px rgba(0,0,0,0.02); overflow: hidden; position: relative;">
+                <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: #10b981;"></div>
+                <h3 style="margin-bottom: 1.5rem; color: #10b981; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 800;">📊 Monthly Summary</h3>
+                <form action="{{ url_for('revenue') }}" method="GET" style="display: flex; gap: 0.75rem; align-items: flex-end;">
+                    <div class="form-group" style="margin-bottom: 0; flex: 1;">
+                        <label style="font-size: 0.75rem;">Pick a Month</label>
+                        <input type="month" name="month" value="{{ selected_month }}" required 
+                               style="background: #f1f5f9; border: 1px solid #e2e8f0; padding: 0.75rem 1rem; border-radius: 0.75rem; font-weight: 600; font-family: inherit;">
+                    </div>
+                    <button type="submit" class="btn-submit" style="width: auto; padding: 0.75rem 1.5rem; background-color: #10b981; border-radius: 0.75rem; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);">Analyze</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Summary Highlight Card -->
+        <div class="card" style="padding: 3rem; border: none; background: {% if view_mode == 'daily' %}linear-gradient(135deg, #0f172a 0%, #1e293b 100%){% else %}linear-gradient(135deg, #064e3b 0%, #065f46 100%){% endif %}; color: white; border-radius: 2rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 2rem;">
+                <div>
+                    <span style="display: inline-block; padding: 0.5rem 1rem; background: rgba(255,255,255,0.1); border-radius: 2rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.2);">
+                        {% if view_mode == 'daily' %}Current Day Overview{% else %}Monthly Performance{% endif %}
+                    </span>
+                    <h2 style="font-size: 2.5rem; font-weight: 800; margin: 0; letter-spacing: -0.02em;">{{ display_label }}</h2>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 0.85rem; opacity: 0.7; font-weight: 600; margin-bottom: 0.25rem;">TOTAL EARNINGS</div>
+                    <div style="font-size: 4rem; font-weight: 900; line-height: 1; letter-spacing: -0.03em;">₹{{ total_revenue }}</div>
+                </div>
+            </div>
+
+            <!-- Separated Stats Section -->
+            <div style="margin-top: 2.5rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 2rem;">
+                <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 1.25rem; border: 1px solid rgba(255,255,255,0.1);">
+                    <div style="font-size: 0.7rem; font-weight: 800; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Passenger Bookings</div>
+                    <div style="font-size: 1.5rem; font-weight: 800;">₹{{ passenger_revenue }}</div>
+                    <div style="font-size: 0.8rem; opacity: 0.7; margin-top: 0.25rem;">{{ passenger_count }} tickets ({{ passenger_pax_total }} passengers)</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 1.25rem; border: 1px solid rgba(255,255,255,0.1);">
+                    <div style="font-size: 0.7rem; font-weight: 800; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Conductor Bookings</div>
+                    <div style="font-size: 1.5rem; font-weight: 800;">₹{{ conductor_revenue }}</div>
+                    <div style="font-size: 0.8rem; opacity: 0.7; margin-top: 0.25rem;">{{ conductor_count }} tickets ({{ conductor_pax_total }} passengers)</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 1.25rem; border: 1px solid rgba(255,255,255,0.1);">
+                    <div style="font-size: 0.7rem; font-weight: 800; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Total Passengers</div>
+                    <div style="font-size: 1.5rem; font-weight: 800;">👤 {{ total_pax_count }}</div>
+                    <div style="font-size: 0.8rem; opacity: 0.7; margin-top: 0.25rem;">Across all routes</div>
+                </div>
+                {% if view_mode == 'daily' %}
+                <div style="background: rgba(59, 130, 246, 0.2); padding: 1.5rem; border-radius: 1.25rem; border: 1px solid rgba(59, 130, 246, 0.3);">
+                    <div style="font-size: 0.7rem; font-weight: 800; color: #93c5fd; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Monthly MTD</div>
+                    <div style="font-size: 1.5rem; font-weight: 800;">₹{{ monthly_total_revenue }}</div>
+                    <div style="font-size: 0.8rem; color: #93c5fd; opacity: 0.8; margin-top: 0.25rem;">Total for {{ selected_month }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Booking Details Table -->
+        <div class="card" style="padding: 2.5rem; border: none; background: white; border-radius: 2rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem;">
+                <div>
+                    <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--text-main); margin: 0;">Detailed Transactions</h2>
+                    <p style="color: #64748b; font-size: 0.9rem; margin-top: 0.25rem;">A list of all tickets issued during this period.</p>
+                </div>
+                <span style="background: #f1f5f9; color: #475569; padding: 0.6rem 1.25rem; border-radius: 1rem; font-size: 0.85rem; font-weight: 700; border: 1px solid #e2e8f0;">
+                    {{ bookings|length }} records found
+                </span>
+            </div>
+            
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: separate; border-spacing: 0 0.75rem;">
+                    <thead>
+                        <tr style="text-align: left;">
+                            <th style="padding: 1rem; color: #64748b; font-size: 0.75rem; text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em;">ID</th>
+                            <th style="padding: 1rem; color: #64748b; font-size: 0.75rem; text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em;">Route</th>
+                            <th style="padding: 1rem; color: #64748b; font-size: 0.75rem; text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em;">Date & Time</th>
+                            <th style="padding: 1rem; color: #64748b; font-size: 0.75rem; text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em;">Method</th>
+                            <th style="padding: 1rem; color: #64748b; font-size: 0.75rem; text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em;">Pax</th>
+                            <th style="padding: 1rem; color: #64748b; font-size: 0.75rem; text-transform: uppercase; font-weight: 800; letter-spacing: 0.05em; text-align: right;">Fare</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in bookings %}
+                        <tr style="background: #f8fafc; transition: all 0.2s ease; cursor: default;" onmouseover="this.style.background='#f1f5f9'; this.style.transform='scale(1.005)'" onmouseout="this.style.background='#f8fafc'; this.style.transform='scale(1)'">
+                            <td style="padding: 1.25rem 1rem; border-radius: 1rem 0 0 1rem;">
+                                <span style="font-weight: 700; color: #475569; font-family: monospace;">#{{ booking.id }}</span>
+                            </td>
+                            <td style="padding: 1.25rem 1rem;">
+                                <div style="font-weight: 700; color: var(--text-main); font-size: 0.95rem;">{{ booking.source }} → {{ booking.destination }}</div>
+                            </td>
+                            <td style="padding: 1.25rem 1rem;">
+                                <div style="font-weight: 600; color: #475569; font-size: 0.85rem;">{{ booking.timestamp.strftime('%d %b') }}</div>
+                                <div style="font-size: 0.75rem; color: #94a3b8; font-weight: 600;">{{ booking.timestamp.strftime('%H:%M %p') }}</div>
+                            </td>
+                            <td style="padding: 1.25rem 1rem;">
+                                <span style="font-size: 0.7rem; font-weight: 800; padding: 0.3rem 0.6rem; border-radius: 0.5rem; 
+                                    {% if booking.booked_by == 'Conductor' %}
+                                        background: #fef3c7; color: #92400e;
+                                    {% else %}
+                                        background: #dcfce7; color: #166534;
+                                    {% endif %}">
+                                    {{ booking.booked_by|upper }}
+                                </span>
+                            </td>
+                            <td style="padding: 1.25rem 1rem;">
+                                <span style="font-weight: 700; font-size: 0.85rem;">👥 {{ booking.num_passengers }}</span>
+                            </td>
+                            <td style="padding: 1.25rem 1rem; border-radius: 0 1rem 1rem 0; text-align: right;">
+                                <span style="font-size: 1.1rem; font-weight: 800; color: #0f172a;">₹{{ booking.fare }}</span>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 5rem 2rem; color: #94a3b8; background: #f8fafc; border-radius: 1rem;">
+                                <div style="font-size: 4rem; margin-bottom: 1.5rem; filter: grayscale(1); opacity: 0.5;">📉</div>
+                                <div style="font-weight: 700; font-size: 1.2rem; color: #64748b;">No bookings to show</div>
+                                <p style="font-size: 0.9rem; margin-top: 0.5rem;">Try selecting a different date or month to view analytics.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    {% if bookings %}
+                    <tfoot>
+                        <tr>
+                            <td colspan="5" style="padding-top: 2rem;">
+                                <div style="background: {% if view_mode == 'daily' %}#eff6ff{% else %}#ecfdf5{% endif %}; padding: 1.5rem 2rem; border-radius: 1.25rem; display: flex; justify-content: space-between; align-items: center; border: 1px dashed {% if view_mode == 'daily' %}#bfdbfe{% else %}#a7f3d0{% endif %};">
+                                    <span style="font-weight: 800; color: #475569; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em;">Closing Balance</span>
+                                    <span style="font-size: 1.75rem; font-weight: 900; color: {% if view_mode == 'daily' %}#1e40af{% else %}#065f46{% endif %};">₹{{ total_revenue }}</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tfoot>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Custom scrollbar for table container */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .revenue-container > div {
+        animation: fadeInUp 0.5s ease-out forwards;
+    }
+    
+    .revenue-container > div:nth-child(2) { animation-delay: 0.1s; }
+    .revenue-container > div:nth-child(3) { animation-delay: 0.2s; }
+</style>
+{% endblock %}

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QTravix - Smart Bus Ticketing</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="logo">QTravix</a>
+            
+            <ul class="nav-links">
+                <li><a href="{{ url_for('index') }}" class="nav-link-text">Home</a></li>
+                <li><a href="{{ url_for('bus_details') }}" class="nav-link-text">Buses</a></li>
+                <li><a href="{{ url_for('ticket_booking') }}" class="nav-link-text">Book Ticket</a></li>
+                <li><a href="{{ url_for('contact') }}" class="nav-link-text">Contact</a></li>
+                
+                <li class="v-divider"></li>
+                
+                <li><a href="{{ url_for('conductor_login') }}" class="nav-link-text">Conductor Login</a></li>
+                <li><a href="{{ url_for('admin_login') }}" class="nav-link-text">Admin Login</a></li>
+                
+                {% if session.admin_id or session.conductor_id %}
+                    <li><a href="{{ url_for('logout') }}" class="nav-link-text" style="color: #f87171 !important;">Logout</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <main class="page-body">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <div class="main-container" style="padding-bottom: 0;">
+                {% for message in messages %}
+                  <div style="padding: 1rem; background: #dcfce7; color: #166534; border-radius: 1rem; text-align: center; font-weight: 600; margin-bottom: 1rem; border: 1px solid #bbf7d0;">
+                    {{ message }}
+                  </div>
+                {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <a href="{{ url_for('index') }}" class="logo">QTravix</a>
+                <p>Revolutionizing public transport with digital-first ticketing. Secure, fast, and paperless travel for everyone.</p>
+                <div class="social-links">
+                    <a href="#" class="social-icon">𝕏</a>
+                    <a href="#" class="social-icon">f</a>
+                    <a href="#" class="social-icon">in</a>
+                    <a href="#" class="social-icon">📸</a>
+                </div>
+            </div>
+
+            <div>
+                <h4 class="footer-heading">Quick Links</h4>
+                <ul class="footer-links">
+                    <li><a href="{{ url_for('index') }}" class="footer-link">Home</a></li>
+                    <li><a href="{{ url_for('bus_details') }}" class="footer-link">Bus Schedules</a></li>
+                    <li><a href="{{ url_for('ticket_booking') }}" class="footer-link">Book Tickets</a></li>
+                    <li><a href="{{ url_for('contact') }}" class="footer-link">Contact Support</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="footer-heading">Staff Portal</h4>
+                <ul class="footer-links">
+                    <li><a href="{{ url_for('admin_login') }}" class="footer-link">Admin Dashboard</a></li>
+                    <li><a href="{{ url_for('conductor_login') }}" class="footer-link">Conductor Portal</a></li>
+                    <li><a href="{{ url_for('admin_register') }}" class="footer-link">Partner with Us</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="footer-heading">Contact Us</h4>
+                <ul class="footer-links">
+                    <li class="footer-link">📍 123 Tech Avenue, India</li>
+                    <li class="footer-link">📧 support@qtravix.com</li>
+                    <li class="footer-link">📞 +1 (800) QTRAVIX</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2026 QTravix Digital Bus System. All rights reserved.</p>
+            <div style="display: flex; gap: 2rem;">
+                <a href="#" class="footer-link" style="font-size: 0.8rem;">Privacy Policy</a>
+                <a href="#" class="footer-link" style="font-size: 0.8rem;">Terms of Service</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

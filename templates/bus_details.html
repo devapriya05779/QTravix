@@ -1,0 +1,144 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="bus-hero-section" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 6rem 1rem; text-align: center; color: white; position: relative; overflow: hidden;">
+    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.1; background-image: url('https://www.transparenttextures.com/patterns/cubes.png'); pointer-events: none;"></div>
+    <div style="max-width: 800px; margin: 0 auto; position: relative; z-index: 1;">
+        <span style="background: var(--primary); color: white; padding: 0.5rem 1.5rem; border-radius: 2rem; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1.5rem; display: inline-block;">Real-time Schedules</span>
+        <h1 style="font-size: 3.5rem; font-weight: 900; letter-spacing: -0.05em; margin-bottom: 1rem;">Explore Our Network</h1>
+        <p style="font-size: 1.2rem; color: #94a3b8; font-weight: 500; max-width: 600px; margin: 0 auto;">Search and book from hundreds of daily bus services across the country with just a few clicks.</p>
+    </div>
+</div>
+
+<div class="content" style="margin-top: -4rem; position: relative; z-index: 10; padding-bottom: 8rem;">
+    <!-- Modern Search Interface -->
+    <div class="card" style="margin-bottom: 3rem; padding: 2rem; border-radius: 2rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 1px solid rgba(255,255,255,0.1);">
+        <div style="display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 300px; position: relative;">
+                <span style="position: absolute; left: 1.5rem; top: 50%; transform: translateY(-50%); font-size: 1.5rem; color: #94a3b8;">🔍</span>
+                <input type="text" id="routeSearch" placeholder="Where do you want to go? (e.g. Kannur, Thalassery...)" 
+                       style="width: 100%; padding: 1.25rem 1.5rem 1.25rem 4rem; border: 2px solid #f1f5f9; border-radius: 1.5rem; font-size: 1.1rem; font-weight: 600; font-family: inherit; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); background: #f8fafc;"
+                       onkeyup="filterBuses()">
+            </div>
+            <div style="background: #f8fafc; padding: 1rem 2rem; border-radius: 1.25rem; border: 1px solid #f1f5f9; text-align: center;">
+                <div style="font-size: 0.7rem; text-transform: uppercase; color: #94a3b8; font-weight: 800; letter-spacing: 0.05em; margin-bottom: 0.2rem;">Live Count</div>
+                <div style="font-weight: 900; font-size: 1.2rem; color: var(--primary);"><span id="busCount">{{ buses|length }}</span> <span style="font-size: 0.9rem; color: #64748b;">Services</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bus Cards Grid -->
+    <div class="dashboard-grid" id="busGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 2rem;">
+        {% for bus in buses %}
+        <div class="bus-card" style="background: white; border-radius: 2rem; border: 1px solid #e2e8f0; overflow: hidden; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative;">
+            <!-- Top Stripe -->
+            <div style="height: 6px; background: var(--primary);"></div>
+            
+            <div style="padding: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem;">
+                    <div>
+                        <div style="font-size: 0.7rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; margin-bottom: 0.25rem;">#{{ bus.id }}</div>
+                        <h3 style="font-size: 1.4rem; font-weight: 900; color: #0f172a; margin: 0;">{{ bus.name }}</h3>
+                    </div>
+                    <div style="background: #f0fdf4; color: #166534; padding: 0.4rem 1rem; border-radius: 2rem; font-size: 0.75rem; font-weight: 800; border: 1px solid #bbf7d0;">AVAILABLE</div>
+                </div>
+
+                <!-- Route Visualization -->
+                <div style="background: #f8fafc; border-radius: 1.5rem; padding: 1.5rem; margin-bottom: 2rem; border: 1px dashed #cbd5e1; position: relative;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; position: relative;">
+                        <div style="flex: 1; text-align: left;">
+                            <div style="font-size: 0.65rem; color: #94a3b8; font-weight: 800; text-transform: uppercase;">From</div>
+                            <div style="font-weight: 800; color: #1e293b; font-size: 1.1rem;">{{ bus.route_from }}</div>
+                        </div>
+                        <div style="padding: 0 1rem; color: #cbd5e1; font-size: 1.5rem; transform: scaleX(1.5);">→</div>
+                        <div style="flex: 1; text-align: right;">
+                            <div style="font-size: 0.65rem; color: #94a3b8; font-weight: 800; text-transform: uppercase;">To</div>
+                            <div style="font-weight: 800; color: #1e293b; font-size: 1.1rem;">{{ bus.route_to }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Row -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <div>
+                        <div style="font-size: 0.65rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; margin-bottom: 0.4rem;">Departure</div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-weight: 800; color: #0f172a; font-size: 1rem;">{{ bus.starting_time }}</span>
+                            <span style="color: #cbd5e1;">•</span>
+                            <span style="font-weight: 600; color: #64748b; font-size: 0.85rem;">{{ bus.date }}</span>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 0.65rem; color: #94a3b8; font-weight: 800; text-transform: uppercase; margin-bottom: 0.4rem;">Fare From</div>
+                        <div style="font-weight: 900; color: var(--primary); font-size: 1.4rem;">₹{{ "%.0f"|format(bus.base_fare) }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- No Results State -->
+    <div id="noResults" style="display: none; padding: 10rem 2rem; text-align: center; animation: fadeIn 0.5s ease;">
+        <div style="font-size: 6rem; margin-bottom: 2rem; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.1));">🚌💨</div>
+        <h2 style="font-weight: 900; font-size: 2.5rem; color: #0f172a; letter-spacing: -0.04em;">No matches found</h2>
+        <p style="font-size: 1.2rem; color: #64748b; font-weight: 500; margin-top: 1rem;">Try searching for a different city or route.</p>
+        <button onclick="document.getElementById('routeSearch').value=''; filterBuses();" style="margin-top: 2rem; background: #f1f5f9; border: none; padding: 1rem 2.5rem; border-radius: 1rem; font-weight: 800; color: #475569; cursor: pointer;">Clear Search</button>
+    </div>
+</div>
+
+<style>
+    .bus-card:hover {
+        transform: translateY(-12px);
+        box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.15);
+        border-color: var(--primary);
+    }
+    
+    .bus-card:hover .btn-submit {
+        background: #1e293b;
+        transform: scale(1.02);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    #routeSearch:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.1);
+        background: white;
+    }
+</style>
+
+<script>
+    function filterBuses() {
+        const input = document.getElementById('routeSearch');
+        const filter = input.value.toUpperCase();
+        const grid = document.getElementById('busGrid');
+        const cards = grid.getElementsByClassName('bus-card');
+        const noResults = document.getElementById('noResults');
+        let visibleCount = 0;
+
+        for (let i = 0; i < cards.length; i++) {
+            const cardText = cards[i].textContent || cards[i].innerText;
+            if (cardText.toUpperCase().indexOf(filter) > -1) {
+                cards[i].style.display = "block";
+                visibleCount++;
+            } else {
+                cards[i].style.display = "none";
+            }
+        }
+
+        document.getElementById('busCount').innerText = visibleCount;
+        
+        if (visibleCount === 0) {
+            grid.style.display = "none";
+            noResults.style.display = "block";
+        } else {
+            grid.style.display = "grid";
+            noResults.style.display = "none";
+        }
+    }
+</script>
+{% endblock %}

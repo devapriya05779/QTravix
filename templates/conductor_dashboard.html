@@ -1,0 +1,365 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Conductor Portal</h1>
+    <p style="color: var(--secondary-color); font-weight: 500; margin-top: 0.5rem;">Manage passenger validation and ticket issuance.</p>
+</div>
+
+<div class="content" style="padding-top: 0;">
+    <!-- Main Menu Buttons -->
+    <div id="conductor-menu" class="dashboard-grid" style="max-width: 800px; margin: 0 auto 4rem auto;">
+        <div class="colorful-card card-blue" onclick="showValidation()" style="cursor: pointer; padding: 3rem 1.5rem;">
+            <span class="icon">🔍</span>
+            <h3>Ticket Validation</h3>
+            <p>Scan passenger QR codes to verify travel passes.</p>
+        </div>
+        
+        <div class="colorful-card card-green" onclick="showGeneration()" style="cursor: pointer; padding: 3rem 1.5rem;">
+            <span class="icon">🎟️</span>
+            <h3>Ticket Generation</h3>
+            <p>Issue digital tickets for offline passengers.</p>
+        </div>
+    </div>
+
+    <!-- 1. Validation Section -->
+    <div id="validation-section" style="display: none; animation: fadeIn 0.4s ease-out;">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <button onclick="backToMenu()" class="btn-submit" style="width: auto; padding: 0.6rem 1.5rem; background: #64748b;">← Back to Menu</button>
+        </div>
+        
+        <div class="card" style="max-width: 600px; margin: 0 auto; text-align: center;">
+            <div id="validation-interface">
+                <h3 style="margin-bottom: 1.5rem;">Ticket Validation</h3>
+                
+                <!-- Scanner Display -->
+                <div id="scanner-wrapper" style="position: relative; border-radius: 1.5rem; overflow: hidden; background: #000; aspect-ratio: 1/1; margin-bottom: 1.5rem; border: 4px solid #f1f5f9;">
+                    <div id="reader" style="width: 100%; height: 100%;"></div>
+                    <div id="scan-beam" style="position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: var(--primary); box-shadow: 0 0 15px var(--primary); animation: scanMove 2s infinite linear; z-index: 10; pointer-events: none;"></div>
+                    
+                    <div id="loading-spinner" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; z-index: 5; width: 80%;">
+                        <div id="spinner-text" style="background: rgba(0,0,0,0.8); padding: 1rem; border-radius: 1rem; font-weight: 700;">
+                            <p>Processing...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div id="validation-controls" style="padding: 0 1rem;">
+                    <div style="display: flex; flex-direction: column; gap: 1rem; align-items: center;">
+                        <div id="camera-status-msg" style="font-size: 0.85rem; color: #64748b; font-weight: 600;">
+                            Scanning via Camera...
+                        </div>
+                        
+                        <div style="display: flex; gap: 1rem; justify-content: center; width: 100%; flex-wrap: wrap;">
+                            <button id="retry-camera-btn" onclick="startScanning()" class="btn-submit" style="width: auto; background: #3b82f6; display: none; padding: 0.8rem 1.5rem;">
+                                📷 Start Camera
+                            </button>
+                            
+                            <label for="qr-input" class="btn-submit" style="background: #10b981; width: auto; padding: 0.8rem 1.5rem; cursor: pointer; margin: 0; display: inline-flex; align-items: center; gap: 0.5rem;">
+                                📁 Upload Ticket (Image/PDF)
+                            </label>
+                        </div>
+                        
+                        <input type="file" id="qr-input" accept="image/*,application/pdf" style="display: none;" onchange="handleFileUpload(event)">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Result Overlay -->
+            <div id="result-overlay" style="display: none;">
+                <div id="status-card" style="padding: 2.5rem; border-radius: 1.5rem; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform: scale(0.9);">
+                    <div id="status-icon" style="font-size: 4rem; margin-bottom: 1rem;"></div>
+                    <h2 id="status-title" style="margin-bottom: 0.5rem; font-weight: 800;"></h2>
+                    <p id="status-details" style="font-weight: 600; font-size: 1.1rem;"></p>
+                    <button onclick="resumeScanning()" class="btn-submit" style="margin-top: 2rem; width: auto; padding: 1rem 2.5rem;">Ready for Next</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Generation Section -->
+    <div id="generation-section" style="display: none; animation: fadeIn 0.4s ease-out;">
+        <div style="text-align: center; margin-bottom: 3rem;">
+            <button onclick="backToMenu()" class="btn-submit" style="width: auto; padding: 0.6rem 1.5rem; background: #64748b;">← Back to Menu</button>
+            <h2 style="margin-top: 2rem;">Select Bus for Ticket Generation</h2>
+        </div>
+        <div class="dashboard-grid" id="bus-list-container">
+            <div style="grid-column: 1/-1; text-align: center; padding: 2rem;">
+                <p>Loading available buses...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes scanMove {
+        0% { top: 0%; opacity: 0; }
+        10% { opacity: 1; }
+        90% { opacity: 1; }
+        100% { top: 100%; opacity: 0; }
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+<script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
+    const menu = document.getElementById('conductor-menu');
+    const validationSection = document.getElementById('validation-section');
+    const generationSection = document.getElementById('generation-section');
+    const busListContainer = document.getElementById('bus-list-container');
+    
+    let html5QrCode = null;
+    let isProcessing = false;
+
+    function showValidation() {
+        menu.style.display = 'none';
+        validationSection.style.display = 'block';
+        startScanning();
+    }
+
+    function showGeneration() {
+        menu.style.display = 'none';
+        generationSection.style.display = 'block';
+        loadBuses();
+    }
+
+    function backToMenu() {
+        if (html5QrCode) {
+            html5QrCode.stop().catch(err => console.log(err));
+        }
+        validationSection.style.display = 'none';
+        generationSection.style.display = 'none';
+        menu.style.display = 'grid';
+    }
+
+    function loadBuses() {
+        fetch('/api/buses')
+            .then(response => response.json())
+            .then(buses => {
+                busListContainer.innerHTML = '';
+                if (buses.length === 0) {
+                    busListContainer.innerHTML = '<div class="card" style="grid-column: 1/-1; text-align: center; padding: 4rem;"><p>No active buses available for issuance.</p></div>';
+                    return;
+                }
+                buses.forEach(bus => {
+                    const busCard = `
+                        <div class="card animate-up" style="padding: 0; overflow: hidden; border: none; transition: transform 0.3s ease;">
+                            <div style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white; padding: 1.5rem; text-align: center;">
+                                <div style="font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.9; margin-bottom: 0.25rem;">Active Service</div>
+                                <h3 style="margin: 0; font-size: 1.4rem;">${bus.name}</h3>
+                            </div>
+                            
+                            <div style="padding: 1.5rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; background: #f8fafc; padding: 0.75rem; border-radius: 1rem; border: 1px solid #e2e8f0;">
+                                    <div style="text-align: left;">
+                                        <span style="font-size: 0.6rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block;">Source</span>
+                                        <strong style="font-size: 0.9rem; color: #0f172a;">${bus.route_from}</strong>
+                                    </div>
+                                    <div style="color: #10b981;"><i class="fas fa-arrow-right"></i></div>
+                                    <div style="text-align: right;">
+                                        <span style="font-size: 0.6rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; display: block;">Dest.</span>
+                                        <strong style="font-size: 0.9rem; color: #0f172a;">${bus.route_to}</strong>
+                                    </div>
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.5rem;">
+                                    <div style="padding: 0.75rem; background: #f0fdf4; border-radius: 1rem; text-align: center;">
+                                        <span style="font-size: 0.6rem; font-weight: 800; color: #166534; text-transform: uppercase; display: block;">Fare/Stage</span>
+                                        <strong style="font-size: 1rem; color: #15803d;">₹${parseFloat(bus.base_fare).toFixed(2)}</strong>
+                                    </div>
+                                    <div style="padding: 0.75rem; background: #eff6ff; border-radius: 1rem; text-align: center;">
+                                        <span style="font-size: 0.6rem; font-weight: 800; color: #1e40af; text-transform: uppercase; display: block;">Time</span>
+                                        <strong style="font-size: 1rem; color: #1d4ed8;">${bus.starting_time}</strong>
+                                    </div>
+                                </div>
+                                
+                                <div style="background: white; border-radius: 1rem; padding: 1rem; text-align: center; margin-bottom: 1.5rem; border: 1px dashed #cbd5e1;">
+                                    <img src="/generate_qr/${bus.id}" style="width: 100px; height: 100px; mix-blend-mode: multiply;">
+                                    <p style="font-size: 0.6rem; font-weight: 800; color: #64748b; margin-top: 0.5rem;">PASSENGER SELF-BOOKING QR</p>
+                                </div>
+                                
+                                <a href="/book_ticket_qr/${bus.id}" class="btn-modern" style="text-decoration: none; padding: 0.8rem; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                                    <span>Manual Booking</span>
+                                    <i class="fas fa-plus"></i>
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                    busListContainer.innerHTML += busCard;
+                });
+            });
+    }
+
+    // Core validation logic
+    function processTicket(decodedText) {
+        isProcessing = true;
+        
+        // UI Feedback
+        document.getElementById('validation-interface').style.display = 'none';
+        document.getElementById('result-overlay').style.display = 'block';
+        document.getElementById('loading-spinner').style.display = 'none';
+        
+        const statusCard = document.getElementById('status-card');
+        setTimeout(() => statusCard.style.transform = 'scale(1)', 50);
+        
+        if (navigator.vibrate) navigator.vibrate(100);
+
+        fetch('/validate_ticket', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ticket_data: decodedText })
+        })
+        .then(response => response.json())
+        .then(data => {
+            const title = document.getElementById('status-title');
+            const icon = document.getElementById('status-icon');
+            const details = document.getElementById('status-details');
+            
+            if (data.status === 'success') {
+                statusCard.style.background = "#dcfce7";
+                statusCard.style.border = "4px solid #22c55e";
+                title.innerText = "VALID TICKET";
+                title.style.color = "#166534";
+                icon.innerText = "✅";
+                details.innerText = data.details;
+            } else if (data.status === 'warning') {
+                statusCard.style.background = "#fef9c3";
+                statusCard.style.border = "4px solid #eab308";
+                title.innerText = "ALREADY USED";
+                title.style.color = "#854d0e";
+                icon.innerText = "⚠️";
+                details.innerText = data.details;
+            } else {
+                statusCard.style.background = "#fee2e2";
+                statusCard.style.border = "4px solid #ef4444";
+                title.innerText = "INVALID TICKET";
+                title.style.color = "#991b1b";
+                icon.innerText = "❌";
+                details.innerText = data.message;
+            }
+        }).catch(err => {
+            alert("Connection error. Check your internet.");
+            resumeScanning();
+        });
+    }
+
+    function onScanSuccess(decodedText) {
+        if (isProcessing) return;
+        if (html5QrCode) {
+            html5QrCode.stop().then(() => {
+                processTicket(decodedText);
+            }).catch(err => {
+                processTicket(decodedText); // Proceed anyway if stop fails
+            });
+        } else {
+            processTicket(decodedText);
+        }
+    }
+
+    async function handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        // If scanning is active, stop it first to prevent conflicts
+        if (html5QrCode && html5QrCode.isScanning) {
+            await html5QrCode.stop().catch(err => console.log(err));
+        }
+
+        document.getElementById('loading-spinner').style.display = 'block';
+        document.getElementById('spinner-text').innerHTML = "<p>Analyzing File...</p>";
+
+        const scanner = new Html5Qrcode("reader");
+
+        try {
+            if (file.type === "application/pdf") {
+                const reader = new FileReader();
+                reader.onload = async function() {
+                    try {
+                        const typedarray = new Uint8Array(this.result);
+                        const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                        const page = await pdf.getPage(1);
+                        const viewport = page.getViewport({ scale: 2.5 }); // Higher scale for PDFs
+                        const canvas = document.createElement('canvas');
+                        const context = canvas.getContext('2d');
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
+                        await page.render({ canvasContext: context, viewport: viewport }).promise;
+                        
+                        canvas.toBlob((blob) => {
+                            const imgFile = new File([blob], "temp.png", { type: "image/png" });
+                            scanner.scanFile(imgFile, false)
+                                .then(text => {
+                                    scanner.clear();
+                                    processTicket(text);
+                                })
+                                .catch(err => {
+                                    document.getElementById('loading-spinner').style.display = 'none';
+                                    alert("No valid QR found in this PDF.");
+                                    startScanning();
+                                });
+                        });
+                    } catch (e) {
+                        alert("Could not read PDF. Ensure it's not corrupted.");
+                        startScanning();
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            } else {
+                // Direct image scan - very fast
+                scanner.scanFile(file, false)
+                    .then(text => {
+                        scanner.clear();
+                        processTicket(text);
+                    })
+                    .catch(err => {
+                        document.getElementById('loading-spinner').style.display = 'none';
+                        alert("No QR code detected in this image.");
+                        startScanning();
+                    });
+            }
+        } catch (err) {
+            document.getElementById('loading-spinner').style.display = 'none';
+            alert("Error processing file.");
+            startScanning();
+        }
+        event.target.value = ''; // Reset input
+    }
+
+    function startScanning() {
+        isProcessing = false;
+        document.getElementById('validation-interface').style.display = 'block';
+        document.getElementById('result-overlay').style.display = 'none';
+        document.getElementById('loading-spinner').style.display = 'none';
+
+        if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
+        
+        if (!html5QrCode.isScanning) {
+            html5QrCode.start(
+                { facingMode: "environment" }, 
+                { 
+                    fps: 30,
+                    qrbox: { width: 300, height: 300 },
+                    aspectRatio: 1.0
+                }, 
+                onScanSuccess
+            ).catch(err => {
+                document.getElementById('camera-status-msg').innerText = "Camera disconnected or blocked.";
+                document.getElementById('retry-camera-btn').style.display = 'inline-block';
+            });
+        }
+    }
+
+    function resumeScanning() {
+        isProcessing = false;
+        document.getElementById('status-card').style.transform = 'scale(0.9)';
+        startScanning();
+    }
+</script>
+{% endblock %}

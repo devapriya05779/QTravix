@@ -1,0 +1,76 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="auth-page-wrapper {{ 'admin-theme' if user_type == 'Admin' else 'conductor-theme' }}">
+    <div class="auth-card-container">
+        <!-- Decoration Elements -->
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        
+        <div class="auth-box glass-effect animate-up">
+            <div class="auth-header">
+                <div class="auth-icon-circle">
+                    {% if user_type == 'Admin' %}
+                        <i class="fas fa-user-shield"></i>
+                    {% else %}
+                        <i class="fas fa-id-card"></i>
+                    {% endif %}
+                </div>
+                <h2>{{ user_type }} Access</h2>
+                <p>Login to your secure dashboard</p>
+            </div>
+            
+            <form method="POST" class="auth-form">
+                <div class="form-group-modern">
+                    <label>{{ user_type }} ID</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-hashtag"></i>
+                        <input type="text" name="{{ user_type.lower() }}_id" autocomplete="username" required placeholder="Ex: {{ 'ADMIN001' if user_type == 'Admin' else 'COND001' }}">
+                    </div>
+                </div>
+                
+                <div class="form-group-modern">
+                    <label>Password</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" name="password" id="password" autocomplete="current-password" required placeholder="••••••••">
+                        <i class="fas fa-eye toggle-password" id="togglePassword" style="position: absolute; right: 1.25rem; cursor: pointer; color: #94a3b8; transition: color 0.3s ease;"></i>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-modern">
+                    <span>Sign In</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </form>
+            
+            <script>
+                const togglePassword = document.querySelector('#togglePassword');
+                const password = document.querySelector('#password');
+
+                togglePassword.addEventListener('click', function (e) {
+                    // toggle the type attribute
+                    const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+                    password.setAttribute('type', type);
+                    // toggle the eye slash icon
+                    this.classList.toggle('fa-eye-slash');
+                    this.classList.toggle('fa-eye');
+                    
+                    // Change color when active
+                    if (type === 'text') {
+                        this.style.color = 'var(--accent)';
+                    } else {
+                        this.style.color = '#94a3b8';
+                    }
+                });
+            </script>
+            
+            <div class="auth-footer">
+                <p>Accessing authorized areas only. 
+                   <a href="{{ url_for(user_type.lower() + '_register') }}">New Staff? Register</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

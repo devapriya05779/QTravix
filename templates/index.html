@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="home-hero">
+    <div class="container" style="text-align: center;">
+        <h1>Travel Smarter with QTravix</h1>
+        <p style="font-size: 1.5rem; opacity: 0.95; margin-bottom: 3.5rem; max-width: 850px; margin-left: auto; margin-right: auto; color: white; text-shadow: 0 2px 10px rgba(0,0,0,0.3);">India's most advanced digital ticketing network. Book your bus journey in seconds.</p>
+        <div style="display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;">
+            <a href="{{ url_for('ticket_booking') }}" class="btn-submit" style="text-decoration: none; width: auto; padding: 1.25rem 3.5rem; background: white; color: var(--primary); font-size: 1.1rem; border-radius: 5rem; box-shadow: 0 10px 20px rgba(0,0,0,0.2);">Get Your Ticket Now</a>
+            <a href="{{ url_for('bus_details') }}" class="btn-submit" style="text-decoration: none; width: auto; padding: 1.25rem 3.5rem; background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.3); color: white; font-size: 1.1rem; border-radius: 5rem;">Explore Routes</a>
+        </div>
+    </div>
+</div>
+
+<div class="home-info-section">
+    <div class="main-container" style="padding-top: 0; padding-bottom: 0;">
+        
+        <div class="grid-3">
+            <div class="colorful-card card-blue">
+                <span class="icon">⚡</span>
+                <h3>Instant Booking</h3>
+                <p>Skip the long queues. Scan the QR code on the bus and get your virtual ticket instantly on your phone.</p>
+            </div>
+            
+            <div class="colorful-card card-green">
+                <span class="icon">📱</span>
+                <h3>Digital Pass</h3>
+                <p>Go completely paperless. Your digital travel pass is secure, unique, and always accessible in your pocket.</p>
+            </div>
+            
+            <div class="colorful-card card-amber">
+                <span class="icon">👮</span>
+                <h3>Staff Access</h3>
+                <p>Advanced high-speed validation for conductors. Verify passenger tickets in seconds with our smart QR scanner.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
